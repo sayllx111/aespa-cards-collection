@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f4ef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="小卡管理簿">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<title>小卡管理簿</title>
+<style>
+:root{--bg:#f7f4ef;--paper:#fffdfa;--ink:#292923;--muted:#77756e;--line:#e8e1d7;--accent:#766b58;--soft:#eee8de;--green:#327456;--red:#b45148}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
+main{max-width:850px;margin:0 auto;padding:22px 15px 50px}.eyebrow{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:700}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:20px}h1{font-size:27px;letter-spacing:.02em;margin:5px 0 4px}.sub{color:var(--muted);font-size:13px;margin:0}.pill{font-size:11px;border:1px solid var(--line);border-radius:99px;padding:5px 9px;white-space:nowrap;background:var(--paper)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:16px 0 22px}.stat,.panel{background:var(--paper);border:1px solid var(--line);border-radius:15px}.stat{padding:13px}.stat span{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:22px;margin-top:4px;overflow-wrap:anywhere}.green{color:var(--green)}.red{color:var(--red)}
+.panel{padding:16px;margin-bottom:18px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}.section-head h2{font-size:17px;margin:0}.hint{font-size:12px;color:var(--muted)}
+form .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field.full{grid-column:1/-1}label{font-size:12px;color:var(--muted)}input,select,textarea{font:inherit;font-size:16px;width:100%;min-width:0;border:1px solid #ddd5c9;border-radius:9px;background:#fff;color:var(--ink);padding:10px 11px;outline-offset:2px}textarea{resize:vertical}button,.file-label{font:inherit;font-size:14px;border-radius:9px;padding:10px 13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;min-height:42px}.primary{background:var(--ink);color:white;border-color:var(--ink)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.small{font-size:12px;padding:7px 9px;min-height:34px}.danger{color:var(--red)}.status-note{font-size:12px;color:var(--muted);margin:10px 0 0}.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.toolbar input{grid-column:1/-1}
+.card-list{display:flex;flex-direction:column;gap:10px}.card-row{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--paper);min-width:0}.thumb{width:64px;height:82px;flex:0 0 64px;background:var(--soft);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:23px}.thumb img{width:100%;height:100%;object-fit:cover}.card-info{flex:1;min-width:0}.card-title{font-weight:700;overflow-wrap:anywhere}.meta{font-size:12px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:99px;padding:2px 7px;margin:5px 4px 0 0}.details{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-top:9px;font-size:12px}.details b{font-size:13px}.row-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.empty{text-align:center;color:var(--muted);padding:24px 10px;border:1px dashed var(--line);border-radius:12px;font-size:13px}
+.backup-buttons{display:flex;gap:8px;flex-wrap:wrap}.foot{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}.toast{font-size:12px;color:var(--green);min-height:18px;margin-top:8px}
+@media(min-width:620px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.toolbar{grid-template-columns:2fr 1fr 1fr}.toolbar input{grid-column:auto}.panel{padding:20px}}
+@media(max-width:380px){main{padding-left:11px;padding-right:11px}.panel{padding:12px}.card-row{gap:9px}.thumb{width:52px;height:70px;flex-basis:52px}.details{grid-template-columns:1fr}.head h1{font-size:24px}}
+</style>
+</head>
+<body>
+<main id="app">
+<header class="head"><div><div class="eyebrow">MY PHOTOCARD COLLECTION</div><h1>小卡管理簿</h1><p class="sub">收藏、進貨、交易與獲利，一起整理好。</p></div><span class="pill">TWD / NT$</span></header>
+<section class="stats" aria-label="統計">
+<div class="stat"><span>目前持有張數</span><strong id="held">0 張</strong></div>
+<div class="stat"><span>庫存成本</span><strong id="inventory">$0</strong></div>
+<div class="stat"><span>已售出營收</span><strong id="revenue">$0</strong></div>
+<div class="stat"><span>已實現損益</span><strong id="profit">$0</strong></div>
+</section>
+<section class="panel">
+<div class="section-head"><h2 id="formHeading">＋ 新增小卡</h2><span class="hint">必填欄位標示 *</span></div>
+<form id="cardForm">
+<input type="hidden" id="editId">
+<div class="grid">
+<div class="field"><label for="name">小卡名稱／版本 *</label><input id="name" required maxlength="120" placeholder="例如：Drama 寧寧特典卡"></div>
+<div class="field"><label for="member">團體／成員</label><input id="member" maxlength="100" placeholder="例如：aespa／寧寧"></div>
+<div class="field"><label for="source">來源／通路</label><input id="source" maxlength="120" placeholder="專輯、特典、快閃店…"></div>
+<div class="field"><label for="status">分類／狀態</label><select id="status"><option value="持有">持有中</option><option value="已售出">已售出</option><option value="送出／交換">送出／交換</option></select></div>
+<div class="field"><label for="qty">購入張數 *</label><input id="qty" type="number" min="1" max="99999" step="1" value="1" required></div>
+<div class="field"><label for="cost">單張買入成本（元） *</label><input id="cost" type="number" min="0" max="100000000" step="0.01" value="0" required></div>
+<div class="field"><label for="price">單張賣出價格（元）</label><input id="price" type="number" min="0" max="100000000" step="0.01" placeholder="未售出可留空"></div>
+<div class="field"><label for="sold">已售出張數</label><input id="sold" type="number" min="0" max="99999" step="1" value="0"></div>
+<div class="field"><label for="fee">每張額外成本（元）</label><input id="fee" type="number" min="0" max="100000000" step="0.01" value="0" placeholder="平台費／包材等"></div>
+<div class="field"><label for="date">購入日期</label><input id="date" type="date"></div>
+<div class="field full"><label for="photo">小卡圖片（選填）</label><input id="photo" type="file" accept="image/*"><div class="hint">圖片會縮小後存入本機資料；建議只上傳小尺寸圖片。</div></div>
+<div class="field full"><label for="notes">備註</label><textarea id="notes" rows="2" maxlength="1000" placeholder="購入平台、卡況、訂單備註…"></textarea></div>
+</div>
+<div class="actions"><button class="primary" type="submit" id="saveBtn">新增小卡</button><button type="button" id="cancelEdit" hidden>取消編輯</button><button type="reset" id="clearBtn">清空欄位</button></div>
+<p class="status-note">同款多張可以記在同一筆。售出張數與單張售價會用來計算營收及已實現損益。</p>
+</form>
+</section>
+<section>
+<div class="section-head"><h2>我的小卡清單</h2><span class="hint" id="count">0 筆</span></div>
+<div class="toolbar"><input id="search" aria-label="搜尋小卡" placeholder="搜尋卡名、成員、版本…"><select id="filter" aria-label="狀態篩選"><option value="全部">全部狀態</option><option value="持有">持有中</option><option value="已售出">已售出</option><option value="送出／交換">送出／交換</option></select><select id="sort" aria-label="排序"><option value="new">最近新增</option><option value="name">名稱排序</option><option value="profit">獲利高至低</option><option value="cost">成本高至低</option></select></div>
+<div id="cardList" class="card-list"><div class="empty">目前還沒有小卡，新增第一筆資料吧！</div></div>
+</section>
+<section class="panel" style="margin-top:20px">
+<div class="section-head"><h2>資料備份與還原</h2><span class="hint">建議定期備份</span></div>
+<p class="sub" style="line-height:1.6;margin-bottom:13px">資料會自動儲存在這台裝置的瀏覽器中。清除網站資料、換裝置或更換瀏覽器可能會遺失資料，因此請定期匯出備份。</p>
+<div class="backup-buttons"><button type="button" id="exportJson">匯出完整備份</button><button type="button" id="exportCsv">匯出 CSV 表格</button><label class="file-label" for="importJson">匯入備份</label><input id="importJson" type="file" accept=".json,application/json" hidden></div>
+<div id="message" class="toast" role="status" aria-live="polite"></div>
+<p class="foot">隱私提醒：資料只儲存在此瀏覽器的本機儲存空間，不會自動同步到其他裝置。匯出備份檔請妥善保管。</p>
+</section>
+</main>
+<script>
+(()=> {
+'use strict';
+const $=id=>document.getElementById(id);
+const STORAGE_KEY='photocard-ledger-v1';
+let items=[],nextId=1,photoData='';
+const money=n=>'$'+(Number(n)||0).toLocaleString('zh-TW',{maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=id=>Number($(id).value||0);
+function say(t){$('message').textContent=t}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,nextId,items}));say('✓ 已自動儲存於這台裝置。')}catch(e){say('儲存空間不足，請匯出備份，並移除部分圖片後再試。')}}
+function read(){try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(d&&Array.isArray(d.items)){items=d.items;nextId=Number(d.nextId)||Math.max(0,...items.map(x=>Number(x.id)||0))+1}}catch(e){items=[]}render()}
+function heldQty(x){return Math.max(0,x.qty-x.sold-(x.status==='已售出'?x.qty:0)-(x.status==='送出／交換'?x.qty:0))}
+function profit(x){return x.sold*(x.price-x.cost-x.fee)}
+function render(){
+ const held=items.reduce((s,x)=>s+heldQty(x),0),inv=items.reduce((s,x)=>s+heldQty(x)*x.cost,0),rev=items.reduce((s,x)=>s+x.sold*x.price,0),p=items.reduce((s,x)=>s+profit(x),0);
+ $('held').textContent=held+' 張';$('inventory').textContent=money(inv);$('revenue').textContent=money(rev);$('profit').textContent=money(p);$('profit').className=p<0?'red':'green';
+ let q=$('search').value.trim().toLowerCase(),f=$('filter').value,s=$('sort').value;
+ let list=items.filter(x=>(f==='全部'||x.status===f)&&[x.name,x.member,x.source,x.notes].join(' ').toLowerCase().includes(q));
+ if(s==='name')list.sort((a,b)=>a.name.localeCompare(b.name,'zh-Hant'));if(s==='profit')list.sort((a,b)=>profit(b)-profit(a));if(s==='cost')list.sort((a,b)=>b.cost-a.cost);
+ $('count').textContent=list.length+' 筆';
+ if(!list.length){$('cardList').innerHTML='<div class="empty">沒有符合條件的資料。</div>';return}
+ $('cardList').innerHTML=list.map(x=>`<article class="card-row"><div class="thumb">${x.photo?`<img src="${x.photo}" alt="${esc(x.name)} 小卡圖片">`:'🃏'}</div><div class="card-info"><div class="card-title">${esc(x.name)}</div><div class="meta">${esc([x.member,x.source].filter(Boolean).join(' · ')||'未填成員／來源')}</div><span class="tag">${esc(x.status)}</span>${x.date?`<span class="tag">${esc(x.date)}</span>`:''}<div class="details"><div>單張成本 <b>${money(x.cost)}</b></div><div>單張售價 <b>${x.price?money(x.price):'—'}</b></div><div>購入 ${x.qty} 張</div><div>已售 ${x.sold} 張 · 剩 ${heldQty(x)} 張</div><div>已售營收 <b>${money(x.sold*x.price)}</b></div><div>已售損益 <b class="${profit(x)<0?'red':'green'}">${money(profit(x))}</b></div></div>${x.notes?`<div class="meta" style="margin-top:8px">${esc(x.notes)}</div>`:''}<div class="row-actions"><button class="small" data-edit="${x.id}">編輯</button><button class="small" data-sell="${x.id}">記錄售出</button><button class="small danger" data-del="${x.id}">刪除</button></div></div></article>`).join('');
+}
+function resetForm(){ $('cardForm').reset();$('editId').value='';$('formHeading').textContent='＋ 新增小卡';$('saveBtn').textContent='新增小卡';$('cancelEdit').hidden=true;photoData='';$('qty').value='1';$('sold').value='0';$('cost').value='0';$('fee').value='0'}
+$('photo').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file){photoData='';return}if(!file.type.startsWith('image/')){say('請選擇圖片檔案。');e.target.value='';return}if(file.size>8*1024*1024){say('圖片請小於 8 MB。');e.target.value='';return}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas'),max=500,scale=Math.min(1,max/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);photoData=canvas.toDataURL('image/jpeg',.78);say('圖片已載入，儲存表單後會一併保存。')};img.onerror=()=>say('無法讀取這張圖片。');img.src=reader.result};reader.readAsDataURL(file)});
+$('cardForm').addEventListener('submit',e=>{e.preventDefault();const id=$('editId').value,qty=num('qty'),sold=num('sold'),cost=num('cost'),price=$('price').value===''?0:num('price'),fee=num('fee');if(!Number.isInteger(qty)||qty<1||!Number.isInteger(sold)||sold<0||sold>qty||[cost,price,fee].some(n=>!Number.isFinite(n)||n<0)){say('請確認金額與張數格式正確，且售出張數不可超過購入張數。');return}
+const old=id?items.find(x=>x.id===Number(id)):null;const x={id:id?Number(id):nextId++,name:$('name').value.trim(),member:$('member').value.trim(),source:$('source').value.trim(),status:$('status').value,qty,sold,cost,price,fee,date:$('date').value,notes:$('notes').value.trim(),photo:photoData||(old&&old.photo)||''};if(!x.name){say('請填寫小卡名稱。');return}if(id)items=items.map(z=>z.id===x.id?x:z);else items.unshift(x);save();resetForm();render()});
+$('cancelEdit').addEventListener('click',resetForm);$('clearBtn').addEventListener('click',()=>setTimeout(resetForm,0));
+$('cardList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const id=Number(b.dataset.edit||b.dataset.sell||b.dataset.del),x=items.find(z=>z.id===id);if(!x)return;
+if(b.dataset.edit){$('editId').value=x.id;for(const k of ['name','member','source','status','qty','cost','price','sold','fee','date','notes'])$(k).value=x[k]??'';photoData=x.photo||'';$('formHeading').textContent='編輯小卡';$('saveBtn').textContent='儲存修改';$('cancelEdit').hidden=false;$('cardForm').scrollIntoView({behavior:'smooth',block:'start'})}
+else if(b.dataset.sell){if(x.sold>=x.qty){say('這筆小卡已全部售出。');return}let n=prompt('這次售出幾張？可售 '+(x.qty-x.sold)+' 張。','1');if(n===null)return;n=Number(n);if(!Number.isInteger(n)||n<1||n>x.qty-x.sold){say('售出張數不正確。');return}let p=prompt('這次每張實際售價（元）？',String(x.price||''));if(p===null)return;p=Number(p);if(!Number.isFinite(p)||p<0){say('售價不正確。');return}if(x.sold>0&&p!==x.price&&!confirm('同一筆先前已售出的卡片使用不同售價。此版本會將所有售出張數以新售價統計，是否繼續？建議不同售價分開建檔。'))return;x.sold+=n;x.price=p;if(x.sold===x.qty)x.status='已售出';save();render();say('已記錄售出 '+n+' 張。')}
+else if(b.dataset.del&&confirm('確定刪除「'+x.name+'」？此操作無法復原，建議先備份。')){items=items.filter(z=>z.id!==id);save();render()}
+});
+['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+$('exportJson').addEventListener('click',()=>{download('小卡管理簿備份.json',JSON.stringify({version:1,nextId,items},null,2),'application/json');say('已匯出完整備份，請保存檔案。')});
+$('exportCsv').addEventListener('click',()=>{const cols=['名稱','團體／成員','來源','狀態','購入張數','已售張數','剩餘張數','單張成本','單張售價','每張額外成本','已售營收','已售損益','購入日期','備註'];const rows=[cols,...items.map(x=>[x.name,x.member,x.source,x.status,x.qty,x.sold,heldQty(x),x.cost,x.price,x.fee,x.sold*x.price,profit(x),x.date,x.notes])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('小卡管理簿.csv','\ufeff'+csv,'text/csv;charset=utf-8');say('CSV 表格已匯出。')});
+$('importJson').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const raw=JSON.parse(await file.text()),data=Array.isArray(raw)?raw:raw.items;if(!Array.isArray(data)||data.some(x=>!x||typeof x.name!=='string'||!Number.isFinite(Number(x.qty))))throw Error('format');if(!confirm('匯入會取代目前所有資料，共 '+data.length+' 筆。建議先匯出目前備份。確定匯入？'))return;items=data.map((x,i)=>({...x,id:Number(x.id)||i+1,qty:Math.max(1,Number(x.qty)||1),sold:Math.max(0,Math.min(Number(x.qty)||1,Number(x.sold)||0)),cost:Math.max(0,Number(x.cost)||0),price:Math.max(0,Number(x.price)||0),fee:Math.max(0,Number(x.fee)||0),photo:typeof x.photo==='string'?x.photo:''}));nextId=Math.max(Number(raw.nextId)||0,...items.map(x=>x.id))+1;save();render();say('備份匯入成功。')}catch(err){say('匯入失敗：請選擇有效的小卡管理簿 JSON 備份。')}finally{e.target.value=''}});
+read();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
